@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market & Games App</title>
+    <title>Sensey Market & Games</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-main: #0a0b10;
-            --bg-card: rgba(22, 24, 35, 0.75);
+            --bg-card: rgba(22, 24, 35, 0.8);
             --bg-card-border: rgba(255, 255, 255, 0.08);
             --accent: #ffb703;
             --accent-glow: rgba(255, 183, 3, 0.25);
@@ -66,7 +66,7 @@
 
 
         .brand-logo {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 900;
             letter-spacing: 0.5px;
             background: linear-gradient(90deg, #fff, var(--accent));
@@ -154,7 +154,7 @@
         .game-card:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.06); }
 
 
-        /* MINES GAME GRID */
+        /* MINES GRID */
         .mines-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -179,16 +179,12 @@
 
 
         .mine-tile:active { transform: scale(0.9); }
-        .mine-tile.revealed-safe { background: rgba(46, 204, 113, 0.2); border-color: var(--green); animation: pop 0.2s; }
-        .mine-tile.revealed-bomb { background: rgba(255, 71, 87, 0.2); border-color: var(--red); animation: shake 0.3s; }
+        .mine-tile.revealed-safe { background: rgba(46, 204, 113, 0.2); border-color: var(--green); }
+        .mine-tile.revealed-bomb { background: rgba(255, 71, 87, 0.2); border-color: var(--red); }
 
 
-        @keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-
-
-        /* INPUTS & SELECTS */
-        input[type="number"], select {
+        /* INPUTS */
+        input, select {
             width: 100%;
             padding: 12px;
             background: rgba(0, 0, 0, 0.4);
@@ -201,10 +197,25 @@
         }
 
 
-        .range-slider {
-            width: 100%;
-            accent-color: var(--accent);
-            margin: 10px 0;
+        .range-slider { width: 100%; accent-color: var(--accent); margin: 10px 0; }
+
+
+        /* PROFILE */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+
+        .avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #333;
+            object-fit: cover;
+            border: 2px solid var(--accent);
         }
 
 
@@ -261,8 +272,7 @@
         
         .toast {
             position: fixed;
-            top: 16px;
-            left: 50%;
+            top: 16px; left: 50%;
             transform: translateX(-50%);
             background: var(--accent);
             color: #000;
@@ -285,7 +295,7 @@
     <div class="app-container">
         <!-- HEADER -->
         <div class="app-header">
-            <div class="brand-logo">SENSEY MARKET</div>
+            <div class="brand-logo">SENSEY HUB</div>
             <div class="balance-badge">
                 <span id="user-gold">500.00</span> G
                 <button class="add-btn" onclick="switchTab('deposit')">┼</button>
@@ -293,10 +303,13 @@
         </div>
 
 
-        <!-- ================= 1. РЫНОК АКЦИЙ ================= -->
+        <!-- ================= 1. РЫНОК ЛОТОВ АКЦИЙ ================= -->
         <div id="tab-market">
-            <h3 style="margin-bottom: 12px; font-size: 16px;">Рынок Акций 📈</h3>
-            <div id="stocks-list"></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="font-size: 16px;">Рынок Лотов 📈</h3>
+                <button class="btn" style="width:auto; padding:6px 12px; font-size:11px;" onclick="openCreateLotModal()">+ Создать лот</button>
+            </div>
+            <div id="lots-list"></div>
         </div>
 
 
@@ -316,181 +329,170 @@
             </div>
 
 
-            <div class="game-card" onclick="alert('Режим В разработке!')">
+            <div class="game-card" onclick="openUpgradeGame()">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <div style="font-size:28px;">⚡</div>
                     <div>
                         <div style="font-weight:800; font-size:15px;">Апгрейд</div>
-                        <div style="font-size:11px; color:var(--text-sub);">Умножай Gold с колесом шансов</div>
+                        <div style="font-size:11px; color:var(--text-sub);">Умножай свой Gold с шансом</div>
                     </div>
                 </div>
-                <span style="background:rgba(255,255,255,0.1); color:var(--text-sub); font-weight:900; font-size:10px; padding:4px 8px; border-radius:6px;">СКОРО</span>
+                <span style="background:var(--accent); color:#000; font-weight:900; font-size:10px; padding:4px 8px; border-radius:6px;">ИГРАТЬ</span>
             </div>
         </div>
 
 
-        <!-- ================= 3. ОКНО ИГРЫ МИНЫ ================= -->
+        <!-- ================= ИГРА МИНЫ ================= -->
         <div id="tab-mines" class="hidden">
             <button style="background:none; border:none; color:var(--text-sub); font-weight:700; cursor:pointer; margin-bottom:10px;" onclick="switchTab('games')">← В Хаб</button>
             <div class="card" style="text-align: center;">
                 <h3 style="color:var(--accent);">МИНИ-ИГРА МИНЫ</h3>
                 <p style="font-size:12px; color:var(--text-sub); margin-top:2px;">Множитель: <b id="mines-mult" style="color:var(--green);">1.00x</b></p>
-
-
                 <div class="mines-grid" id="mines-grid"></div>
-
-
                 <div style="text-align: left;">
-                    <label style="font-size:11px; color:var(--text-sub);">Режим мин:</label>
-                    <select id="mines-count-select">
-                        <option value="3">3 Мины (Легко)</option>
-                        <option value="5" selected>5 Мин (Средне)</option>
-                        <option value="8">8 Мин (Сложно)</option>
-                        <option value="12">12 Мин (Экстрим)</option>
-                    </select>
-
-
-                    <div style="display:flex; justify-content:space-between; font-size:12px;">
-                        <span style="color:var(--text-sub);">Ставка:</span>
-                        <b style="color:var(--accent);"><span id="mines-bet-val">10</span> G</b>
-                    </div>
+                    <label style="font-size:11px; color:var(--text-sub);">Мины:</label>
+                    <select id="mines-count-select"><option value="3">3</option><option value="5" selected>5</option><option value="8">8</option></select>
+                    <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:var(--text-sub);">Ставка:</span><b style="color:var(--accent);"><span id="mines-bet-val">10</span> G</b></div>
                     <input type="range" id="mines-bet-slider" class="range-slider" min="10" max="200" value="10" step="5" oninput="document.getElementById('mines-bet-val').innerText = this.value">
-
-
-                    <button class="btn" id="mines-start-btn" onclick="startMinesGame()">НАЧАТЬ ИГРУ</button>
-                    <button class="btn btn-green hidden" id="mines-cashout-btn" onclick="cashoutMines()">ЗАБРАТЬ 0.00 G</button>
+                    <button class="btn" id="mines-start-btn" onclick="startMinesGame()">НАЧАТЬ</button>
+                    <button class="btn btn-green hidden" id="mines-cashout-btn" onclick="cashoutMines()">ЗАБРАТЬ</button>
                 </div>
             </div>
         </div>
 
 
-        <!-- ================= 4. ЗАДАНИЯ / СПОНСОРЫ ================= -->
+        <!-- ================= ИГРА АПГРЕЙД ================= -->
+        <div id="tab-upgrade" class="hidden">
+            <button style="background:none; border:none; color:var(--text-sub); font-weight:700; cursor:pointer; margin-bottom:10px;" onclick="switchTab('games')">← В Хаб</button>
+            <div class="card" style="text-align:center;">
+                <h3 style="color:var(--accent);">АПГРЕЙД GOLD ⚡</h3>
+                <p style="font-size:12px; color:var(--text-sub); margin:6px 0 16px 0;">Выбери желаемый шанс выигрыша:</p>
+                <input type="number" id="up-bet" placeholder="Ставка (G)" value="10">
+                <input type="range" id="up-chance-slider" class="range-slider" min="10" max="90" value="50" oninput="document.getElementById('up-chance-val').innerText = this.value">
+                <p style="font-size:13px; margin-bottom:12px;">Шанс: <b id="up-chance-val" style="color:var(--accent);">50</b>% | Множитель: <b id="up-mult" style="color:var(--green);">1.90x</b></p>
+                <button class="btn" onclick="playUpgrade()">УМНОЖИТЬ</button>
+            </div>
+        </div>
+
+
+        <!-- ================= 3. ЗАДАНИЯ ================= -->
         <div id="tab-tasks" class="hidden">
-            <h3 style="margin-bottom: 12px; font-size: 16px;">Задания и Награды 🎁</h3>
+            <h3 style="margin-bottom: 12px; font-size: 16px;">Задания 🎁</h3>
             <div id="tasks-list"></div>
         </div>
 
 
-        <!-- ================= 5. ПОПОЛНЕНИЕ / ВЫВОД ================= -->
+        <!-- ================= 4. ДЕПОЗИТ / ВЫВОД ================= -->
         <div id="tab-deposit" class="hidden">
             <div class="card">
-                <h3>Пополнение Gold 💳</h3>
-                <p style="font-size:12px; color:var(--text-sub); margin:6px 0 12px 0;">Введите сумму для создания заявки:</p>
-                <input type="number" id="dep-amount" placeholder="Сумма в Gold (G)">
-                <button class="btn btn-green" onclick="createDeposit()">Создать заявку</button>
+                <h3>Пополнение 💳</h3>
+                <input type="number" id="dep-amount" placeholder="Сумма (G)">
+                <button class="btn btn-green" onclick="createDeposit()">Пополнить</button>
             </div>
             <div class="card">
                 <h3>Вывод средств 📤</h3>
-                <p style="font-size:12px; color:var(--text-sub); margin:6px 0 12px 0;">Укажите сумму вывода:</p>
-                <input type="number" id="with-amount" placeholder="Сумма в Gold (G)">
-                <button class="btn btn-red" onclick="createWithdraw()">Запросить вывод</button>
+                <input type="number" id="with-amount" placeholder="Сумма (G)">
+                <button class="btn btn-red" onclick="requestWithdraw()">Запросить вывод</button>
             </div>
         </div>
 
 
-        <!-- ================= 6. ПРОФИЛЬ & АДМИНКА ================= -->
+        <!-- ================= 5. ПРОФИЛЬ & АДМИНКА ================= -->
         <div id="tab-profile" class="hidden">
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="profile-header">
+                    <img id="user-avatar" class="avatar" src="" alt="">
                     <div>
-                        <h3 id="prof-name">SENSEY</h3>
-                        <p style="font-size:12px; color:var(--text-sub);">Трейдер / Игрок</p>
+                        <h3 id="user-fullname">Загрузка...</h3>
+                        <p id="user-username" style="font-size:12px; color:var(--text-sub);">@username</p>
                     </div>
-                    <button style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="toggleAdminPanel()">⚙️</button>
+                </div>
+                <div style="margin-top: 12px;">
+                    <label style="font-size:11px; color:var(--text-sub);">Активировать промокод:</label>
+                    <div style="display:flex; gap:8px; margin-top:4px;">
+                        <input type="text" id="promo-input" placeholder="Введите код..." style="margin:0;">
+                        <button class="btn" style="width:110px; padding:0;" onclick="checkPromo()">OK</button>
+                    </div>
                 </div>
             </div>
 
 
-            <!-- МОЙ ИНВЕНТАРЬ АКТИВОВ -->
-            <div class="card">
-                <h4 style="margin-bottom:10px;">Мой портфель акций</h4>
-                <div id="my-portfolio-list" style="font-size:13px; color:var(--text-sub);">Нет купленных акций</div>
-            </div>
-
-
-            <!-- СЕКРЕТНАЯ АДМИН-ПАНЕЛЬ -->
-            <div class="card hidden" id="admin-panel" style="border-color: var(--accent);">
+            <!-- АДМИН ПАНЕЛЬ (СКРЫТАЯ ДО ВВОДА ПРОМОКОДА) -->
+            <div class="card hidden" id="admin-panel" style="border-color:var(--accent);">
                 <h3 style="color:var(--accent); margin-bottom:10px;">👑 Админ Панель</h3>
-                <label style="font-size:11px;">Выдать / Списать Gold:</label>
-                <input type="number" id="admin-gold-input" placeholder="Количество (например 500 или -100)">
-                <button class="btn" onclick="adminAddGold()" style="margin-bottom:12px;">Применить к балансу</button>
+                
+                <h4 style="font-size:13px; margin:10px 0 6px 0;">Заявки на вывод:</h4>
+                <div id="admin-withdraws" style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">Нет заявок</div>
 
 
-                <label style="font-size:11px;">Шанс подкрутки в Минах (%):</label>
-                <input type="number" id="admin-rig-input" value="40" placeholder="Процент слива (0-100)">
-                <button class="btn btn-red" onclick="adminSetRig()">Сохранить подкрутку</button>
+                <h4 style="font-size:13px; margin:10px 0 6px 0;">Модерация лотов акций:</h4>
+                <div id="admin-lots" style="font-size:12px; color:var(--text-sub);">Нет лотов на модерацию</div>
             </div>
         </div>
     </div>
 
 
-    <!-- МОДАЛЬНОЕ ОКНО АКТИВА ДЛЯ ПОКУПКИ/ПРОДАЖИ -->
-    <div class="modal hidden" id="stock-modal">
+    <!-- МОДАЛКА СОЗДАНИЯ ЛОТА -->
+    <div class="modal hidden" id="lot-modal">
         <div class="card" style="width:100%; max-width:360px; margin:0;">
-            <h3 id="modal-stock-title">Акция</h3>
-            <p style="font-size:12px; color:var(--text-sub);" id="modal-stock-price">Текущая цена: 0 G</p>
-            <p style="font-size:12px; color:var(--text-sub); margin-bottom:12px;" id="modal-stock-owned">У вас есть: 0 шт.</p>
-            
-            <input type="number" id="modal-stock-qty" value="1" min="1" placeholder="Количество">
-            
-            <div style="display:flex; gap:8px; margin-top:10px;">
-                <button class="btn btn-green" onclick="executeStockBuy()">Купить</button>
-                <button class="btn btn-red" onclick="executeStockSell()">Продать</button>
-            </div>
-            <button class="btn" style="background:transparent; color:var(--text-sub); margin-top:6px; box-shadow:none;" onclick="closeStockModal()">Закрыть</button>
+            <h3>Создать лот акции</h3>
+            <p style="font-size:11px; color:var(--text-sub); margin:6px 0 12px 0;">Ваш лот попадет на рынок после проверки админом.</p>
+            <input type="text" id="lot-name" placeholder="Название акции (например: Apple)">
+            <input type="number" id="lot-price" placeholder="Цена за 1 шт (G)">
+            <input type="number" id="lot-qty" placeholder="Количество шт.">
+            <button class="btn btn-green" onclick="submitLot()">Создать лот</button>
+            <button class="btn" style="background:transparent; color:var(--text-sub); margin-top:6px; box-shadow:none;" onclick="document.getElementById('lot-modal').classList.add('hidden')">Отмена</button>
         </div>
     </div>
 
 
     <!-- НИЖНЯЯ НАВИГАЦИЯ -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('market')" id="nav-market">
-            <div class="nav-icon">📈</div>
-            <div>Рынок</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('games')" id="nav-games">
-            <div class="nav-icon">🎮</div>
-            <div>Игры</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('tasks')" id="nav-tasks">
-            <div class="nav-icon">🎁</div>
-            <div>Задания</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('profile')" id="nav-profile">
-            <div class="nav-icon">👤</div>
-            <div>Профиль</div>
-        </div>
+        <div class="nav-item active" onclick="switchTab('market')" id="nav-market"><div class="nav-icon">📈</div><div>Рынок</div></div>
+        <div class="nav-item" onclick="switchTab('games')" id="nav-games"><div class="nav-icon">🎮</div><div>Игры</div></div>
+        <div class="nav-item" onclick="switchTab('tasks')" id="nav-tasks"><div class="nav-icon">🎁</div><div>Задания</div></div>
+        <div class="nav-item" onclick="switchTab('profile')" id="nav-profile"><div class="nav-icon">👤</div><div>Профиль</div></div>
     </div>
 
 
     <script>
-        // БАЗА ДАННЫХ ЛОКАЛЬНОГО СОСТОЯНИЯ
-        let db = JSON.parse(localStorage.getItem('sensey_app_db')) || {
+        // ИНИЦИАЛИЗАЦИЯ ДАННЫХ И TELEGRAM WEBAPP
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+
+        let user = tg.initDataUnsafe?.user || {
+            first_name: "Sensey",
+            last_name: "User",
+            username: "sensey_trader",
+            photo_url: "https://via.placeholder.com/150"
+        };
+
+
+        document.getElementById('user-fullname').innerText = `${user.first_name} ${user.last_name || ''}`;
+        document.getElementById('user-username').innerText = `@${user.username || 'user'}`;
+        document.getElementById('user-avatar').src = user.photo_url || 'https://via.placeholder.com/150';
+
+
+        let db = JSON.parse(localStorage.getItem('sensey_app_db_v2')) || {
             balance: 500.00,
-            rigChance: 0.40, // 40% Chance
-            portfolio: {}, // { 'STX': count }
+            isAdmin: false,
+            lots: [
+                { id: 1, seller: 'System', name: 'Standoff Pass', price: 45.00, qty: 10 },
+                { id: 2, seller: 'System', name: 'Crypto Gold', price: 310.00, qty: 5 }
+            ],
+            withdraws: [],
             completedTasks: []
         };
 
 
-        const STOCKS_DATA = {
-            'MKT': { name: 'Market Shares', price: 120.50 },
-            'STX': { name: 'Standoff Gold Pass', price: 45.00 },
-            'CRY': { name: 'Crypto Gold', price: 310.00 }
-        };
-
-
         const TASKS_DATA = [
-            { id: 1, title: 'Подписка на Telegram Трейдинг', reward: 50, link: 'https://t.me/telegram' },
-            { id: 2, title: 'Запустить Игрового Бота', reward: 75, link: 'https://t.me/telegram' }
+            { id: 1, title: 'Подписка на Telegram Канал', reward: 50, link: 'https://t.me/telegram' }
         ];
 
 
-        let activeStockTicker = null;
-
-
         function saveDB() {
-            localStorage.setItem('sensey_app_db', JSON.stringify(db));
+            localStorage.setItem('sensey_app_db_v2', JSON.stringify(db));
             document.getElementById('user-gold').innerText = db.balance.toFixed(2);
         }
 
@@ -503,10 +505,9 @@
         }
 
 
-        // НАВИГАЦИЯ МЕЖДУ ВКЛАДКАМИ
         function switchTab(tab) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            ['tab-market', 'tab-games', 'tab-mines', 'tab-tasks', 'tab-deposit', 'tab-profile'].forEach(id => {
+            ['tab-market', 'tab-games', 'tab-mines', 'tab-upgrade', 'tab-tasks', 'tab-deposit', 'tab-profile'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
 
@@ -514,7 +515,7 @@
             if (tab === 'market') {
                 document.getElementById('nav-market').classList.add('active');
                 document.getElementById('tab-market').classList.remove('hidden');
-                renderMarket();
+                renderMarketLots();
             } else if (tab === 'games') {
                 document.getElementById('nav-games').classList.add('active');
                 document.getElementById('tab-games').classList.remove('hidden');
@@ -525,288 +526,243 @@
             } else if (tab === 'profile') {
                 document.getElementById('nav-profile').classList.add('active');
                 document.getElementById('tab-profile').classList.remove('hidden');
-                renderPortfolio();
+                if(db.isAdmin) renderAdminPanel();
             } else if (tab === 'deposit') {
                 document.getElementById('tab-deposit').classList.remove('hidden');
             }
         }
 
 
-        /* ================= РЫНОК И МОДАЛЬНОЕ ОКНО ================= */
-        function renderMarket() {
-            const container = document.getElementById('stocks-list');
+        /* ================= РЫНОК И ЛОТЫ ================= */
+        function renderMarketLots() {
+            const container = document.getElementById('lots-list');
             container.innerHTML = '';
-            Object.keys(STOCKS_DATA).forEach(ticker => {
-                const item = STOCKS_DATA[ticker];
-                const card = document.createElement('div');
-                card.className = 'game-card';
-                card.onclick = () => openStockModal(ticker);
-                card.innerHTML = `
-                    <div>
-                        <div style="font-weight:800; font-size:15px;">${item.name} (${ticker})</div>
-                        <div style="font-size:11px; color:var(--text-sub);">Нажмите для покупки/продажи</div>
+            if(db.lots.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-sub); font-size:13px; text-align:center;">Нет активных лотов</p>';
+                return;
+            }
+            db.lots.forEach(lot => {
+                container.innerHTML += `
+                    <div class="game-card">
+                        <div>
+                            <div style="font-weight:800; font-size:15px;">${lot.name}</div>
+                            <div style="font-size:11px; color:var(--text-sub);">Продавец: @${lot.seller} | Доступно: ${lot.qty} шт.</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <b style="color:var(--accent); font-size:14px; display:block; margin-bottom:4px;">${lot.price.toFixed(2)} G</b>
+                            <button class="btn btn-green" style="padding:4px 10px; font-size:11px; width:auto;" onclick="buyLot(${lot.id})">Купить</button>
+                        </div>
                     </div>
-                    <b style="color:var(--accent); font-size:14px;">${item.price.toFixed(2)} G</b>
                 `;
-                container.appendChild(card);
             });
         }
 
 
-        function openStockModal(ticker) {
-            activeStockTicker = ticker;
-            const stock = STOCKS_DATA[ticker];
-            const owned = db.portfolio[ticker] || 0;
-
-
-            document.getElementById('modal-stock-title').innerText = `${stock.name} (${ticker})`;
-            document.getElementById('modal-stock-price').innerText = `Текущая цена: ${stock.price.toFixed(2)} G`;
-            document.getElementById('modal-stock-owned').innerText = `В вашем портфеле: ${owned} шт.`;
-            document.getElementById('stock-modal').classList.remove('hidden');
+        function openCreateLotModal() {
+            document.getElementById('lot-modal').classList.remove('hidden');
         }
 
 
-        function closeStockModal() {
-            document.getElementById('stock-modal').classList.add('hidden');
-        }
+        function submitLot() {
+            const name = document.getElementById('lot-name').value;
+            const price = parseFloat(document.getElementById('lot-price').value);
+            const qty = parseInt(document.getElementById('lot-qty').value);
 
 
-        function executeStockBuy() {
-            const qty = parseInt(document.getElementById('modal-stock-qty').value) || 0;
-            if (qty <= 0) return;
-            const cost = STOCKS_DATA[activeStockTicker].price * qty;
+            if(!name || !price || !qty) { showToast('Заполните все поля!'); return; }
 
 
-            if (db.balance < cost) {
-                showToast('Недостаточно Gold!');
-                return;
-            }
-
-
-            db.balance -= cost;
-            db.portfolio[activeStockTicker] = (db.portfolio[activeStockTicker] || 0) + qty;
+            db.lots.push({ id: Date.now(), seller: user.username || 'user', name, price, qty });
             saveDB();
-            showToast(`Куплено ${qty} шт.!`);
-            closeStockModal();
+            document.getElementById('lot-modal').classList.add('hidden');
+            showToast('Лот отправлен на модерацию админу!');
         }
 
 
-        function executeStockSell() {
-            const qty = parseInt(document.getElementById('modal-stock-qty').value) || 0;
-            if (qty <= 0) return;
-            const owned = db.portfolio[activeStockTicker] || 0;
+        function buyLot(id) {
+            const lot = db.lots.find(l => l.id === id);
+            if(!lot) return;
+            if(db.balance < lot.price) { showToast('Недостаточно Gold!'); return; }
 
 
-            if (owned < qty) {
-                showToast('У вас нет столько акций!');
-                return;
+            db.balance -= lot.price;
+            lot.qty--;
+            if(lot.qty <= 0) {
+                db.lots = db.lots.filter(l => l.id !== id);
             }
-
-
-            const win = STOCKS_DATA[activeStockTicker].price * qty;
-            db.balance += win;
-            db.portfolio[activeStockTicker] -= qty;
             saveDB();
-            showToast(`Продано на +${win.toFixed(2)} G`);
-            closeStockModal();
+            renderMarketLots();
+            showToast('Покупка успешна!');
         }
 
 
-        function renderPortfolio() {
-            const list = document.getElementById('my-portfolio-list');
-            list.innerHTML = '';
-            let has = false;
-            Object.keys(db.portfolio).forEach(ticker => {
-                if (db.portfolio[ticker] > 0) {
-                    has = true;
-                    list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                        <span>${STOCKS_DATA[ticker].name}:</span>
-                        <b style="color:var(--accent);">${db.portfolio[ticker]} шт.</b>
-                    </div>`;
-                }
+        /* ================= ПРОМОКОД И АДМИНКА ================= */
+        function checkPromo() {
+            const code = document.getElementById('promo-input').value.trim();
+            if(code === 'SENSEY67') {
+                db.isAdmin = true;
+                saveDB();
+                showToast('Админ-панель активирована!');
+                renderAdminPanel();
+            } else {
+                showToast('Неверный промокод');
+            }
+        }
+
+
+        function renderAdminPanel() {
+            document.getElementById('admin-panel').classList.remove('hidden');
+            
+            // Вывод заявок
+            const wContainer = document.getElementById('admin-withdraws');
+            wContainer.innerHTML = db.withdraws.length ? '' : 'Нет заявок';
+            db.withdraws.forEach((w, idx) => {
+                wContainer.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span>Сумма: ${w.amount} G</span>
+                    <button class="btn btn-green" style="width:auto; padding:2px 6px; font-size:10px;" onclick="resolveWithdraw(${idx})">Выплачено</button>
+                </div>`;
             });
-            if (!has) list.innerText = 'У вас пока нет купленных акций';
+
+
+            // Модерация лотов
+            const lContainer = document.getElementById('admin-lots');
+            lContainer.innerHTML = db.lots.length ? '' : 'Нет лотов';
+            db.lots.forEach(l => {
+                lContainer.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span>${l.name} (${l.price} G)</span>
+                    <span style="color:var(--green);">Опубликовано</span>
+                </div>`;
+            });
         }
 
 
-        /* ================= МИНИ-ИГРА МИНЫ ================= */
-        let minesState = { active: false, bet: 10, mineCount: 5, revealed: 0, grid: [], mults: [], currentMult: 1.00 };
+        function resolveWithdraw(idx) {
+            db.withdraws.splice(idx, 1);
+            saveDB();
+            renderAdminPanel();
+            showToast('Заявка закрыта');
+        }
 
 
-        function openMinesGame() {
+        function requestWithdraw() {
+            const val = parseFloat(document.getElementById('with-amount').value);
+            if(val > 0 && db.balance >= val) {
+                db.balance -= val;
+                db.withdraws.push({ amount: val, user: user.username });
+                saveDB();
+                showToast('Заявка на вывод отправлена!');
+            } else {
+                showToast('Ошибка суммы!');
+            }
+        }
+
+
+        function createDeposit() {
+            const val = parseFloat(document.getElementById('dep-amount').value);
+            if(val > 0) { showToast('Заявка на депозит создана'); document.getElementById('dep-amount').value = ''; }
+        }
+
+
+        /* ================= ИГРА АПГРЕЙД ================= */
+        function openUpgradeGame() {
             switchTab('none');
-            document.getElementById('tab-mines').classList.remove('hidden');
-            renderEmptyMinesGrid();
+            document.getElementById('tab-upgrade').classList.remove('hidden');
         }
 
 
-        function renderEmptyMinesGrid() {
-            const grid = document.getElementById('mines-grid');
-            grid.innerHTML = '';
-            for (let i = 0; i < 25; i++) {
-                const tile = document.createElement('div');
-                tile.className = 'mine-tile';
-                tile.innerText = '❓';
-                tile.onclick = () => clickMineTile(i);
-                grid.appendChild(tile);
-            }
+        document.getElementById('up-chance-slider').oninput = function() {
+            const chance = parseInt(this.value);
+            document.getElementById('up-chance-val').innerText = chance;
+            const mult = (95 / chance).toFixed(2);
+            document.getElementById('up-mult').innerText = `${mult}x`;
         }
 
 
-        function startMinesGame() {
-            const bet = parseFloat(document.getElementById('mines-bet-slider').value);
-            const count = parseInt(document.getElementById('mines-count-select').value);
-
-
-            if (db.balance < bet) { showToast('Недостаточно Gold!'); return; }
+        function playUpgrade() {
+            const bet = parseFloat(document.getElementById('up-bet').value);
+            const chance = parseInt(document.getElementById('up-chance-slider').value);
+            if(db.balance < bet || bet <= 0) { showToast('Недостаточно средств!'); return; }
 
 
             db.balance -= bet;
-            saveDB();
-
-
-            minesState = {
-                active: true, bet: bet, mineCount: count, revealed: 0,
-                grid: Array(25).fill(false),
-                mults: Array.from({length: 25 - count}, (_, i) => parseFloat((1.05 + (i * 0.12 * (count/4))).toFixed(2))),
-                currentMult: 1.00
-            };
-
-
-            let p = 0;
-            while (p < count) {
-                let r = Math.floor(Math.random() * 25);
-                if (!minesState.grid[r]) { minesState.grid[r] = true; p++; }
+            const roll = Math.random() * 100;
+            if(roll <= chance) {
+                const mult = parseFloat((95 / chance).toFixed(2));
+                const win = parseFloat((bet * mult).toFixed(2));
+                db.balance += win;
+                showToast(`Победа! +${win} G`);
+            } else {
+                showToast('Неудача! Попробуйте еще раз');
             }
+            saveDB();
+        }
 
 
-            document.getElementById('mines-mult').innerText = '1.00x';
+        /* ================= МИНЫ ================= */
+        let minesState = { active: false, bet: 10, mineCount: 5, revealed: 0, grid: [], mults: [], currentMult: 1.00 };
+        function openMinesGame() { switchTab('none'); document.getElementById('tab-mines').classList.remove('hidden'); renderEmptyMinesGrid(); }
+        function renderEmptyMinesGrid() {
+            const grid = document.getElementById('mines-grid'); grid.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const tile = document.createElement('div'); tile.className = 'mine-tile'; tile.innerText = '❓';
+                tile.onclick = () => clickMineTile(i); grid.appendChild(tile);
+            }
+        }
+        function startMinesGame() {
+            const bet = parseFloat(document.getElementById('mines-bet-slider').value);
+            if (db.balance < bet) { showToast('Мало Gold!'); return; }
+            db.balance -= bet; saveDB();
+            minesState = { active: true, bet, mineCount: 5, revealed: 0, grid: Array(25).fill(false), mults: [1.15, 1.35, 1.60, 1.95, 2.40], currentMult: 1.00 };
+            let p = 0; while(p < 5) { let r = Math.floor(Math.random()*25); if(!minesState.grid[r]) { minesState.grid[r]=true; p++; } }
             document.getElementById('mines-start-btn').classList.add('hidden');
             document.getElementById('mines-cashout-btn').classList.remove('hidden');
-            document.getElementById('mines-cashout-btn').disabled = true;
-            document.getElementById('mines-cashout-btn').innerText = 'ЗАБРАТЬ 0.00 G';
             renderEmptyMinesGrid();
         }
-
-
         function clickMineTile(idx) {
-            if (!minesState.active) return;
+            if(!minesState.active) return;
             const tiles = document.querySelectorAll('.mine-tile');
-            if (tiles[idx].classList.contains('revealed-safe') || tiles[idx].classList.contains('revealed-bomb')) return;
-
-
-            // Скрытая подкрутка
-            if (minesState.currentMult >= 1.30 && minesState.currentMult <= 2.10) {
-                if (Math.random() < db.rigChance) minesState.grid[idx] = true;
-            }
-
-
-            if (minesState.grid[idx]) {
-                tiles[idx].classList.add('revealed-bomb');
-                tiles[idx].innerText = '💣';
-                endMinesGame(false);
+            if(minesState.grid[idx]) {
+                tiles[idx].classList.add('revealed-bomb'); tiles[idx].innerText = '💣';
+                minesState.active = false; document.getElementById('mines-start-btn').classList.remove('hidden'); document.getElementById('mines-cashout-btn').classList.add('hidden');
+                showToast('Взрыв!');
             } else {
-                tiles[idx].classList.add('revealed-safe');
-                tiles[idx].innerText = '💎';
+                tiles[idx].classList.add('revealed-safe'); tiles[idx].innerText = '💎';
                 minesState.revealed++;
-                minesState.currentMult = minesState.mults[minesState.revealed - 1];
-
-
-                const win = (minesState.bet * minesState.currentMult).toFixed(2);
+                minesState.currentMult = minesState.mults[Math.min(minesState.revealed-1, 4)];
                 document.getElementById('mines-mult').innerText = `${minesState.currentMult}x`;
-                const cBtn = document.getElementById('mines-cashout-btn');
-                cBtn.disabled = false;
-                cBtn.innerText = `ЗАБРАТЬ ${win} G`;
             }
         }
-
-
         function cashoutMines() {
-            if (!minesState.active || minesState.revealed === 0) return;
+            if(!minesState.active) return;
             const win = parseFloat((minesState.bet * minesState.currentMult).toFixed(2));
-            db.balance += win;
-            saveDB();
-            showToast(`ВЫИГРЫШ +${win} G!`);
-            endMinesGame(true);
-        }
-
-
-        function endMinesGame(isWin) {
+            db.balance += win; saveDB();
             minesState.active = false;
-            const tiles = document.querySelectorAll('.mine-tile');
-            minesState.grid.forEach((isMine, i) => {
-                if (isMine) { tiles[i].classList.add('revealed-bomb'); tiles[i].innerText = '💣'; }
-            });
             document.getElementById('mines-start-btn').classList.remove('hidden');
             document.getElementById('mines-cashout-btn').classList.add('hidden');
-            if (!isWin) showToast('Взрыв! Не повезло');
+            showToast(`Забрано +${win} G!`);
         }
 
 
         /* ================= ЗАДАНИЯ ================= */
         function renderTasks() {
-            const list = document.getElementById('tasks-list');
-            list.innerHTML = '';
+            const list = document.getElementById('tasks-list'); list.innerHTML = '';
             TASKS_DATA.forEach(task => {
                 const done = db.completedTasks.includes(task.id);
-                const card = document.createElement('div');
-                card.className = 'game-card';
-                card.innerHTML = `
-                    <div>
-                        <div style="font-weight:800; font-size:14px;">${task.title}</div>
-                        <div style="font-size:11px; color:var(--accent);">Награда: +${task.reward} G</div>
-                    </div>
-                    <button class="btn" style="width:auto; padding:6px 12px; font-size:11px;" 
-                        ${done ? 'disabled' : ''} onclick="doTask(${task.id}, '${task.link}', ${task.reward})">
-                        ${done ? 'Выполнено' : 'Открыть'}
-                    </button>
-                `;
-                list.appendChild(card);
+                list.innerHTML += `<div class="game-card"><div><div style="font-weight:800; font-size:14px;">${task.title}</div><div style="font-size:11px; color:var(--accent);">+${task.reward} G</div></div>
+                <button class="btn" style="width:auto; padding:6px 12px; font-size:11px;" ${done?'disabled':''} onclick="doTask(${task.id},'${task.link}',${task.reward})">${done?'Готово':'Смотреть'}</button></div>`;
             });
         }
-
-
         function doTask(id, link, reward) {
             window.open(link, '_blank');
             setTimeout(() => {
-                if (!db.completedTasks.includes(id)) {
-                    db.completedTasks.push(id);
-                    db.balance += reward;
-                    saveDB();
-                    showToast(`Задание выполнено! +${reward} G`);
-                    renderTasks();
+                if(!db.completedTasks.includes(id)) {
+                    db.completedTasks.push(id); db.balance += reward; saveDB();
+                    showToast(`Награда получена! +${reward} G`); renderTasks();
                 }
             }, 3000);
         }
 
 
-        /* ================= ДЕПОЗИТ И АДМИНКА ================= */
-        function createDeposit() {
-            const val = parseFloat(document.getElementById('dep-amount').value);
-            if (val > 0) { showToast('Заявка на пополнение создана!'); document.getElementById('dep-amount').value = ''; }
-        }
-        function createWithdraw() {
-            const val = parseFloat(document.getElementById('with-amount').value);
-            if (val > 0 && db.balance >= val) {
-                db.balance -= val; saveDB(); showToast('Заявка на вывод отправлена!'); document.getElementById('with-amount').value = '';
-            } else { showToast('Недостаточно средств!'); }
-        }
-
-
-        function toggleAdminPanel() {
-            document.getElementById('admin-panel').classList.toggle('hidden');
-        }
-        function adminAddGold() {
-            const val = parseFloat(document.getElementById('admin-gold-input').value) || 0;
-            db.balance += val; saveDB(); showToast(`Баланс изменен на ${val} G`);
-        }
-        function adminSetRig() {
-            const val = parseFloat(document.getElementById('admin-rig-input').value) || 0;
-            db.rigChance = val / 100; saveDB(); showToast(`Шанс слива установлен: ${val}%`);
-        }
-
-
-        // Старт приложения
         saveDB();
         switchTab('market');
     </script>
